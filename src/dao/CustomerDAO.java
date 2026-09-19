@@ -60,15 +60,12 @@ public class CustomerDAO {
             Hash hash = Password.hash(pepperedPassword).withArgon2();
 
             String hashedPassword = hash.getResult();
-            String salt = hash.getSalt();
-
 
             statement.setString(1, customer.getUsername());
             statement.setString(2, hashedPassword);
             statement.setString(3, customer.getEmail());
 
             return statement.executeUpdate() > 0;
-
 
 
         } catch (Exception e){

@@ -2,10 +2,18 @@ package service;
 
 import dao.CustomerDAO;
 import model.Customer;
+import util.DBConnection;
 import org.mindrot.jbcrypt.BCrypt;
 import com.password4j.Password;
 import com.password4j.Hash;
 import com.password4j.types.Argon2;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AuthService {
 
@@ -35,28 +43,12 @@ public class AuthService {
 
     public boolean registerCustomer(String username, String password, String email){
 
-        if(validUsername(username)){
-            System.out.println("Username is valid");
-        }
-        else{
-            System.out.println("USERNAME INVALID");
-        }
+        validateRegistrationInputFields(validUsername(username), "Username");
+        validateRegistrationInputFields(validPassword(password), "Password");
+        validateRegistrationInputFields(validEmail(email), "Email");
 
-        if(validPassword(password)){
-            System.out.println("Password is valid");
-        }
-        else{
-            System.out.println("PASSWORD INVALID");
-        }
-
-        if(validEmail(email)){
-            System.out.println("Email is valid");
-        }
-        else{
-            System.out.println("EMAIL IS INVALID");
-        }
-
-        if(validUsername(username) && validPassword(password) && validEmail(email)){
+        if(validUsername(username) && validPassword(password) && validEmail(email) && isNewUsername(username)
+            && isNewEmailAddress(email)){
 
             Customer customer = new Customer();
             customer.setUsername(username);
@@ -95,6 +87,71 @@ public class AuthService {
         String validEmailFormat = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 
         return email.matches(validEmailFormat);
+    }
+
+    public void validateRegistrationInputFields(boolean isValid, String fieldName){
+
+        if(isValid){
+            System.out.println(fieldName + " is valid");
+        }
+        else{
+            System.out.println(fieldName + " IS INVALID");
+        }
+
+    }
+
+    public boolean isNewUsername(String username){
+
+        Set<String> listOfUsername = new HashSet<>();
+
+        String sql = "SELECT customer_username FROM customer";
+
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet result = statement.executeQuery()){
+
+            while (result.next()){
+                listOfUsername.add(result.getString("customer_username"));
+            }
+
+            if(!listOfUsername.contains(username)){
+                return true;
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("USERNAME IS ALREADY TAKEN");
+        return false;
+    }
+
+    public boolean isNewEmailAddress(String email){
+
+        Set<String> listOfEmails = new HashSet<>();
+
+        String sql = "SELECT customer_email FROM customer";
+
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet result = statement.executeQuery()){
+
+            while (result.next()){
+                listOfEmails.add(result.getString("customer_email"));
+            }
+
+            if(!listOfEmails.contains(email)){
+                return true;
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("EMAIL IS ASSOCIATED WITH ANOTHER USER");
+        return false;
     }
 
 
