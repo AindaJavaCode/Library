@@ -150,6 +150,7 @@ public class AuthService {
             e.printStackTrace();
         }
 
+        //return
         System.out.println("EMAIL IS ASSOCIATED WITH ANOTHER USER");
         return false;
     }
