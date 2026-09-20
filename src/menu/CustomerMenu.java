@@ -29,7 +29,7 @@ public class CustomerMenu {
 
             case 1 -> searchBooks();
             case 2 -> System.out.println("Building");
-            case 3 -> System.out.println("Building");
+            case 3 -> System.out.println("Thank you for using this library system");
             default -> System.out.println("Not a valid option");
 
 
@@ -46,8 +46,41 @@ public class CustomerMenu {
         System.out.println("Searching...");
         userDAO.searchBooks(searchTerm);
 
+        String optionToBorrow;
+
+        boolean borrowSelection = false;
+
+        do{
+            System.out.println("Would you like to borrow one of the displayed books? (Y/N) : ");
+            optionToBorrow = scanner.nextLine().toLowerCase();
+
+            if(optionToBorrow.equals("y")){
+                System.out.println("Enter unique book ID");
+                borrowSelection = true;
+            } else if(!optionToBorrow.equals("n")){
+                System.out.println("That was not a valid input");
+            }
+        } while (!borrowSelection);
+
+
+
+        System.out.println("Please select if you would like to carry out further actions : ");
+        System.out.println("1. Search Books");
+        System.out.println("2. Return books assigned to you");
+        System.out.println("3. Logout");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch(choice) {
+
+            case 1 -> searchBooks();
+            case 2 -> System.out.println("Building");
+            case 3 -> System.out.println("Thank you for using this library system");
+            default -> System.out.println("Not a valid option");
+
+        }
 
     }
-
 
 }
