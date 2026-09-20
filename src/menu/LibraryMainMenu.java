@@ -44,19 +44,35 @@ private void loginCustomer(){
     String password;
 
     System.out.println("You are logging in as a customer");
-    System.out.print("Please enter your username : ");
-    username = scanner.nextLine();
-    System.out.print("Please enter your password : ");
-    password = scanner.nextLine();
 
-    Customer customer = authService.loginCustomer(username, password);
+    boolean successfulLogin = false;
+    int invalidLoginCounter = 0;
 
-    if (customer != null){
-        new CustomerMenu().start(customer);
-    }
-    else{
-        System.out.println("Invalid login. Check username and password");
-    }
+    do{
+
+        System.out.print("Please enter your username : ");
+        username = scanner.nextLine();
+        System.out.print("Please enter your password : ");
+        password = scanner.nextLine();
+        Customer customer = authService.loginCustomer(username, password);
+
+        if (customer != null){
+            new CustomerMenu().start(customer);
+            successfulLogin = true;
+        }
+
+        //will allow for three login attempts
+        else if (invalidLoginCounter <2){
+            System.out.println("Invalid login. Check username and password");
+            invalidLoginCounter++;
+        }
+
+        else {
+            System.out.println("You have failed login three times. Please try again later");
+            break;
+        }
+    } while (!successfulLogin);
+
 }
 
 

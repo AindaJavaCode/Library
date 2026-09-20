@@ -26,7 +26,7 @@ public class AuthService {
 
         //verifies that the pw provided by user
         //when hashed and salted
-        //matches hashed and salted pw in the db
+        //matches hashed and salted pw in the db+
 
         String pepperedPassword = password + System.getenv("PASSWORD_PEPPER");
 
