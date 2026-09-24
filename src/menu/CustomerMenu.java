@@ -1,16 +1,16 @@
 package menu;
 
+import dao.CustomerDAO;
 import model.Customer;
 import dao.UserDAO;
 
-import java.awt.print.Book;
-import java.util.List;
 import java.util.Scanner;
 
 public class CustomerMenu {
 
     private Scanner scanner = new Scanner(System.in);
     private UserDAO userDAO = new UserDAO();
+    private CustomerDAO customerDAO = new CustomerDAO();
 
 
     public void start(Customer customer){
@@ -46,22 +46,26 @@ public class CustomerMenu {
         System.out.println("Searching...");
         userDAO.searchBooks(searchTerm);
 
-        String optionToBorrow;
+        String optionToBorrow = "";
 
         boolean borrowSelection = false;
 
-        do{
+        while(!borrowSelection){
+
             System.out.println("Would you like to borrow one of the displayed books? (Y/N) : ");
             optionToBorrow = scanner.nextLine().toLowerCase();
 
             if(optionToBorrow.equals("y")){
-                System.out.println("Enter unique book ID");
-                borrowSelection = true;
-            } else if(!optionToBorrow.equals("n")){
-                System.out.println("That was not a valid input");
-            }
-        } while (!borrowSelection);
+                borrowBook();
+                break;
+            } else if(optionToBorrow.equals("n")){
+                break;
 
+            }
+
+            System.out.println("That was not a valid input");
+
+        }
 
 
         System.out.println("Please select if you would like to carry out further actions : ");
@@ -80,6 +84,17 @@ public class CustomerMenu {
             default -> System.out.println("Not a valid option");
 
         }
+
+    }
+
+    private void borrowBook(){
+
+        int bookID;
+        System.out.println("Enter the ID number of the book you wish to borrow");
+        bookID = scanner.nextInt();
+        scanner.nextLine();
+        customerDAO.customerBorrowBooks(bookID);
+
 
     }
 

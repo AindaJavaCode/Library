@@ -6,9 +6,7 @@ import util.DBConnection;
 import java.sql.*;
 import com.password4j.Password;
 import com.password4j.Hash;
-import com.password4j.types.Argon2;
-import java.util.regex.Pattern;
-
+import service.Session;
 
 
 public class CustomerDAO {
@@ -22,10 +20,12 @@ public class CustomerDAO {
               statement.setString(1, username);
               ResultSet rs = statement.executeQuery();
 
+
               if(rs.next()){
                   Customer customer = new Customer();
                   customer.setUsername(rs.getString("customer_username"));
                   customer.setPassword(rs.getString("customer_password"));
+                  customer.setId(rs.getInt("customer_id"));
                   return customer;
               }
 
@@ -73,6 +73,84 @@ public class CustomerDAO {
             return false;
 
         }
+
+    }
+
+    public void customerBorrowBooks(int bookID){
+
+        String sql1 = "SELECT * FROM books WHERE book_ID = ?";
+
+
+        String sql2 = "UPDATE books SET isborrowed_by_customer_id = ?, is_borrowed = ? WHERE book_id = ?";
+
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement statement = conn.prepareStatement(sql1)){
+
+            statement.setInt(1, bookID);
+
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+
+                String name = rs.getString("book_name");
+                int numOfPages = rs.getInt("num_pages");
+                String book_author = rs.getString("book_author");
+                boolean isRare = rs.getBoolean("is_rare");
+                boolean isBorrowed = rs.getBoolean("is_borrowed");
+
+                String rare;
+                String borrowed;
+
+                if (isRare) {
+                    rare = "Yes";
+                } else {
+                    rare = "No";
+                }
+
+                if (isBorrowed) {
+                    borrowed = "Yes this is currently borrowed";
+                } else {
+                    borrowed = "This book is not currently borrowed and is available";
+                }
+
+                System.out.printf("Book Name : %s\n", name);
+                System.out.printf("Number of Pages : %d\n", numOfPages);
+                System.out.printf("Author : %s\n", book_author);
+                System.out.printf("Is this a rare book? : %s\n", rare);
+                System.out.printf("Is this book currently borrowed : %s\n\n", borrowed);
+
+                if (isBorrowed) {
+                    System.out.println("Sorry you cannot borrow that books as it is on loan to someone else");
+                    conn.close();
+                } else {
+                    try (Connection conn2 = DBConnection.getConnection();
+                         PreparedStatement statement2 = conn.prepareStatement(sql2)) {
+
+
+                        statement2.setInt(1, Session.getLoggedInCustomer().getId());
+                        statement2.setBoolean(2, true);
+                        statement2.setInt(3, bookID);
+
+                        ResultSet rs2 = statement2.executeQuery();
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }
+
+        } catch (Exception e){
+                e.printStackTrace();
+
+            }
+
+
+
+
+
 
     }
 }

@@ -52,6 +52,7 @@ public class UserDAO {
                 System.out.printf("Author : %s\n", book_author);
                 System.out.printf("Is this a rare book? : %s\n", rare);
                 System.out.printf("Is this book currently borrowed : %s\n\n", borrowed);
+                conn.close();
 
             }
 

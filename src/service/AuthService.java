@@ -34,6 +34,7 @@ public class AuthService {
 
 
         if(customer.getUsername().equals(username) && validPassword){
+            Session.setLoggedInCustomer(customer);
             return customer;
         }
 
