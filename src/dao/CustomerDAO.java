@@ -11,39 +11,39 @@ import service.Session;
 
 public class CustomerDAO {
 
-    public Customer getCustomerByUsername(String username){
-          String sql = "SELECT * FROM customer WHERE customer_username = ?";
+    public Customer getCustomerByUsername(String username) {
+        String sql = "SELECT * FROM customer WHERE customer_username = ?";
 
-          try(Connection conn = DBConnection.getConnection();
-          PreparedStatement statement = conn.prepareStatement(sql)){
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql)) {
 
-              statement.setString(1, username);
-              ResultSet rs = statement.executeQuery();
+            statement.setString(1, username);
+            ResultSet rs = statement.executeQuery();
 
 
-              if(rs.next()){
-                  Customer customer = new Customer();
-                  customer.setUsername(rs.getString("customer_username"));
-                  customer.setPassword(rs.getString("customer_password"));
-                  customer.setId(rs.getInt("customer_id"));
-                  return customer;
-              }
+            if (rs.next()) {
+                Customer customer = new Customer();
+                customer.setUsername(rs.getString("customer_username"));
+                customer.setPassword(rs.getString("customer_password"));
+                customer.setId(rs.getInt("customer_id"));
+                return customer;
+            }
 
-          } catch (Exception e) {
-              e.printStackTrace();
-          }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-          return null;
+        return null;
     }
 
-    public boolean createCustomer(Customer customer){
+    public boolean createCustomer(Customer customer) {
 
-          String sql = "INSERT INTO customer (customer_username, customer_password, customer_email)" +
-                    "VALUES (?, ?, ?)";
+        String sql = "INSERT INTO customer (customer_username, customer_password, customer_email)" +
+                "VALUES (?, ?, ?)";
 
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)){
+             PreparedStatement statement = conn.prepareStatement(sql)) {
 
             String pepper = System.getenv("PASSWORD_PEPPER");
 
@@ -68,7 +68,7 @@ public class CustomerDAO {
             return statement.executeUpdate() > 0;
 
 
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
 
@@ -76,15 +76,15 @@ public class CustomerDAO {
 
     }
 
-    public void customerBorrowBooks(int bookID){
+    public void customerBorrowBooks(int bookID) {
 
         String sql1 = "SELECT * FROM books WHERE book_ID = ?";
 
 
         String sql2 = "UPDATE books SET isborrowed_by_customer_id = ?, is_borrowed = ? WHERE book_id = ?";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement statement = conn.prepareStatement(sql1)){
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql1)) {
 
             statement.setInt(1, bookID);
 
@@ -121,7 +121,7 @@ public class CustomerDAO {
 
                 if (isBorrowed) {
                     System.out.println("Sorry you cannot borrow that books as it is on loan to someone else");
-                    conn.close();
+
                 } else {
                     try (Connection conn2 = DBConnection.getConnection();
                          PreparedStatement statement2 = conn.prepareStatement(sql2)) {
@@ -131,7 +131,7 @@ public class CustomerDAO {
                         statement2.setBoolean(2, true);
                         statement2.setInt(3, bookID);
 
-                        ResultSet rs2 = statement2.executeQuery();
+                        statement2.executeUpdate();
 
 
                     } catch (Exception e) {
@@ -142,15 +142,42 @@ public class CustomerDAO {
                 }
             }
 
-        } catch (Exception e){
-                e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
 
+        }
+
+
+    }
+
+    public void displayCustomerBooks() {
+
+        String sql = "SELECT book_name, book_author FROM books WHERE isborrowed_by_customer_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql)) {
+
+
+            statement.setInt(1, Session.getLoggedInCustomer().getId());
+
+            ResultSet rs = statement.executeQuery();
+
+
+            while (rs.next()) {
+
+                String name = rs.getString("book_name");
+                String author = rs.getString("book_author");
+
+                System.out.println(name + " -> " +author);
             }
 
 
 
 
+        } catch (SQLException e) {
+           e.printStackTrace();
 
+        }
 
     }
 }

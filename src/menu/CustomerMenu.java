@@ -17,6 +17,7 @@ public class CustomerMenu {
         System.out.printf("Welcome to the library %s\n", customer.getUsername());
         System.out.println("Here you can manage your account. You can search the library and borrow and return books");
         System.out.println("If you have any books they will appear here : ");
+        displayBooks();
         System.out.println("Please select if you would like to carry out further actions : ");
         System.out.println("1. Search Books");
         System.out.println("2. Return books assigned to you");
@@ -96,6 +97,12 @@ public class CustomerMenu {
         customerDAO.customerBorrowBooks(bookID);
 
 
+    }
+
+    private void displayBooks(){
+        System.out.println("************************");
+        customerDAO.displayCustomerBooks();
+        System.out.println("************************");
     }
 
 }
