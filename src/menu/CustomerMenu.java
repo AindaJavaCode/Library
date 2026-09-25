@@ -17,27 +17,10 @@ public class CustomerMenu {
         System.out.printf("Welcome to the library %s\n", customer.getUsername());
         System.out.println("Here you can manage your account. You can search the library and borrow and return books");
         System.out.println("If you have any books they will appear here : ");
+
         displayBooks();
-        System.out.println("Please select if you would like to carry out further actions : ");
-        System.out.println("1. Search Books");
-        System.out.println("2. Return books assigned to you");
-        System.out.println("3. Logout");
 
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch(choice){
-
-            case 1 -> searchBooks();
-            case 2 -> System.out.println("Building");
-            case 3 -> System.out.println("Thank you for using this library system");
-            default -> System.out.println("Not a valid option");
-
-
-
-        }
-
-        scanner.close();
+        nextSteps();
 
     }
 
@@ -69,22 +52,7 @@ public class CustomerMenu {
         }
 
 
-        System.out.println("Please select if you would like to carry out further actions : ");
-        System.out.println("1. Search Books");
-        System.out.println("2. Return books assigned to you");
-        System.out.println("3. Logout");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch(choice) {
-
-            case 1 -> searchBooks();
-            case 2 -> System.out.println("Building");
-            case 3 -> System.out.println("Thank you for using this library system");
-            default -> System.out.println("Not a valid option");
-
-        }
+        nextSteps();
 
     }
 
@@ -101,8 +69,46 @@ public class CustomerMenu {
 
     private void displayBooks(){
         System.out.println("************************");
+        System.out.println("These are the books that are borrowed in your name : ");
         customerDAO.displayCustomerBooks();
         System.out.println("************************");
+    }
+
+    private void returnBooks(){
+        System.out.println("************************");
+        System.out.println("You have selected to return a book");
+        displayBooks();
+
+        System.out.println("Please select the ID of the book you wish to return");
+        int bookID;
+        bookID = scanner.nextInt();
+        scanner.nextLine();
+        customerDAO.customerReturnBooks(bookID);
+
+
+    }
+
+    public void nextSteps(){
+
+        System.out.println("Please select if you would like to carry out further actions : ");
+        System.out.println("1. Search Books");
+        System.out.println("2. Return books assigned to you");
+        System.out.println("3. Logout");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch(choice) {
+
+            case 1 -> searchBooks();
+            case 2 -> returnBooks();
+            case 3 -> System.out.println("Thank you for using this library system");
+            default -> System.out.println("Not a valid option");
+
+        }
+
+
+
     }
 
 }

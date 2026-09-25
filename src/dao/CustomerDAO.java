@@ -11,11 +11,23 @@ import service.Session;
 
 public class CustomerDAO {
 
+    private static final String GET_CUSTOMER_USERNAME = "SELECT * FROM customer WHERE customer_username = ?";
+
+    private static final String CREATE_CUSTOMER = "INSERT INTO customer (customer_username, customer_password, customer_email) VALUES (?, ?, ?)";
+
+    private static final String SEARCH_BOOKS_BY_ID = "SELECT * FROM books WHERE book_ID = ?";
+
+    private static final String UPDATE_BORROW_BOOK = "UPDATE books SET isborrowed_by_customer_id = ?, is_borrowed = ? WHERE book_id = ?";
+
+    private static final String DISPLAY_BOOKS = "SELECT book_name, book_author FROM books WHERE isborrowed_by_customer_id = ?";
+
+    private static final String RETURN_BOOK = "UPDATE books SET is_borrowed = false, isborrowed_by_customer_id = null WHERE book_id = ?";
+
+
     public Customer getCustomerByUsername(String username) {
-        String sql = "SELECT * FROM customer WHERE customer_username = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(GET_CUSTOMER_USERNAME)) {
 
             statement.setString(1, username);
             ResultSet rs = statement.executeQuery();
@@ -38,13 +50,10 @@ public class CustomerDAO {
 
     public boolean createCustomer(Customer customer) {
 
-        String sql = "INSERT INTO customer (customer_username, customer_password, customer_email)" +
-                "VALUES (?, ?, ?)";
-
-
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(CREATE_CUSTOMER)) {
 
+            //pepper is saved as an environment variable
             String pepper = System.getenv("PASSWORD_PEPPER");
 
             if (pepper == null || pepper.isBlank()) {
@@ -52,7 +61,6 @@ public class CustomerDAO {
             }
 
             //Adds secret pepper to unhashed password
-            //pepper is saved as an environment variable
             String pepperedPassword = customer.getPassword() + pepper;
 
             //Argon2 adds a salt by default so
@@ -78,13 +86,8 @@ public class CustomerDAO {
 
     public void customerBorrowBooks(int bookID) {
 
-        String sql1 = "SELECT * FROM books WHERE book_ID = ?";
-
-
-        String sql2 = "UPDATE books SET isborrowed_by_customer_id = ?, is_borrowed = ? WHERE book_id = ?";
-
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql1)) {
+             PreparedStatement statement = conn.prepareStatement(SEARCH_BOOKS_BY_ID)) {
 
             statement.setInt(1, bookID);
 
@@ -124,7 +127,7 @@ public class CustomerDAO {
 
                 } else {
                     try (Connection conn2 = DBConnection.getConnection();
-                         PreparedStatement statement2 = conn.prepareStatement(sql2)) {
+                         PreparedStatement statement2 = conn2.prepareStatement(UPDATE_BORROW_BOOK)) {
 
 
                         statement2.setInt(1, Session.getLoggedInCustomer().getId());
@@ -152,10 +155,8 @@ public class CustomerDAO {
 
     public void displayCustomerBooks() {
 
-        String sql = "SELECT book_name, book_author FROM books WHERE isborrowed_by_customer_id = ?";
-
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(DISPLAY_BOOKS)) {
 
 
             statement.setInt(1, Session.getLoggedInCustomer().getId());
@@ -168,16 +169,29 @@ public class CustomerDAO {
                 String name = rs.getString("book_name");
                 String author = rs.getString("book_author");
 
-                System.out.println(name + " -> " +author);
+                System.out.println(name + " -> " + author);
             }
 
 
-
-
         } catch (SQLException e) {
-           e.printStackTrace();
+            e.printStackTrace();
 
         }
 
+    }
+
+    public void customerReturnBooks(int bookID) {
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement statement = conn.prepareStatement(RETURN_BOOK)) {
+
+            statement.setInt(1, bookID);
+
+            statement.executeUpdate();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
