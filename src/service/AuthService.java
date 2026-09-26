@@ -19,10 +19,18 @@ public class AuthService {
 
     private CustomerDAO customerDAO = new CustomerDAO();
 
+    public static final int PASSWORD_MIN_LENGTH = 12;
+
+    public static final int PASSWORD_MAX_LENGTH = 25;
+
 
     public Customer loginCustomer(String username, String password){
 
         Customer customer = customerDAO.getCustomerByUsername(username);
+
+        if(customer == null){
+            return null;
+        }
 
         //verifies that the pw provided by user
         //when hashed and salted
@@ -33,7 +41,7 @@ public class AuthService {
         boolean validPassword = Password.check(pepperedPassword, customer.getPassword()).withArgon2();
 
 
-        if(customer.getUsername().equals(username) && validPassword){
+        if(customer != null && customer.getUsername().equals(username) && validPassword){
             Session.setLoggedInCustomer(customer);
             return customer;
         }
@@ -70,7 +78,7 @@ public class AuthService {
         String geTwoLetterRegex = ".*[A-Za-z].*[A-Za-z].*";
         String geOneUpperOneLowerLetter = "^(?=.*[A-Z])(?=.*[a-z]).+$";
 
-        return password.length() >= 12 && password.matches(geOneNumberRegex)
+        return password.length() >= PASSWORD_MIN_LENGTH && password.length() <=PASSWORD_MAX_LENGTH && password.matches(geOneNumberRegex)
                 && password.matches(geOneSpecialCharacterRegex) && password.matches(geTwoLetterRegex)
                 && password.matches(geOneUpperOneLowerLetter);
     }

@@ -51,9 +51,6 @@ public class CustomerMenu {
 
         }
 
-
-        nextSteps();
-
     }
 
     private void borrowBook(){
@@ -63,7 +60,6 @@ public class CustomerMenu {
         bookID = scanner.nextInt();
         scanner.nextLine();
         customerDAO.customerBorrowBooks(bookID);
-
 
     }
 
@@ -83,29 +79,39 @@ public class CustomerMenu {
         int bookID;
         bookID = scanner.nextInt();
         scanner.nextLine();
-        customerDAO.customerReturnBooks(bookID);
-
+        boolean returned = customerDAO.customerReturnBooks(bookID);
 
     }
 
     public void nextSteps(){
 
-        System.out.println("Please select if you would like to carry out further actions : ");
-        System.out.println("1. Search Books");
-        System.out.println("2. Return books assigned to you");
-        System.out.println("3. Logout");
+        boolean loggedIn = true;
 
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+        while(loggedIn){
 
-        switch(choice) {
+            System.out.println("Please select if you would like to carry out further actions : ");
+            System.out.println("1. Search Books");
+            System.out.println("2. Return books assigned to you");
+            System.out.println("3. Logout");
 
-            case 1 -> searchBooks();
-            case 2 -> returnBooks();
-            case 3 -> System.out.println("Thank you for using this library system");
-            default -> System.out.println("Not a valid option");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch(choice) {
+
+                case 1 -> searchBooks();
+                case 2 -> returnBooks();
+                case 3 -> {
+                    System.out.println("Thank you for using this library system");
+                    loggedIn = false;
+                }
+                default -> System.out.println("Not a valid option");
+
+            }
 
         }
+
+
 
 
 

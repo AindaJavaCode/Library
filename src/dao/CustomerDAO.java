@@ -21,7 +21,10 @@ public class CustomerDAO {
 
     private static final String DISPLAY_BOOKS = "SELECT book_name, book_author FROM books WHERE isborrowed_by_customer_id = ?";
 
-    private static final String RETURN_BOOK = "UPDATE books SET is_borrowed = false, isborrowed_by_customer_id = null WHERE book_id = ?";
+    private static final String RETURN_BOOK = "UPDATE books SET is_borrowed = false, isborrowed_by_customer_id = null WHERE book_id = ? AND isborrowed_by_customer_id = ? AND is_borrowed = true";
+
+    private static final String VERIFY_BORROWRETURN = "SELECT is_borrowed, isborrowed_by_customer_id FROM books WHERE book_id = ?";
+
 
 
     public Customer getCustomerByUsername(String username) {
@@ -134,8 +137,8 @@ public class CustomerDAO {
                         statement2.setBoolean(2, true);
                         statement2.setInt(3, bookID);
 
-                        statement2.executeUpdate();
-
+                        int rowsAffected = statement2.executeUpdate();
+                        verifyBorrow(rowsAffected);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -149,6 +152,7 @@ public class CustomerDAO {
             e.printStackTrace();
 
         }
+
 
 
     }
@@ -180,18 +184,57 @@ public class CustomerDAO {
 
     }
 
-    public void customerReturnBooks(int bookID) {
+    public boolean customerReturnBooks(int bookID) {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement statement = conn.prepareStatement(RETURN_BOOK)) {
 
             statement.setInt(1, bookID);
+            statement.setInt(2, Session.getLoggedInCustomer().getId());
 
-            statement.executeUpdate();
+            int rowsAffected = statement.executeUpdate();
+
+            if(rowsAffected == 1){
+                System.out.println("Book successfully returned");
+                return true;
+            }
+
+            System.out.println("You cannot return this book as it is not currently borrowed by you");
+            return false;
 
 
         } catch (SQLException e) {
+            System.out.println("There was an error in returning the book");
             e.printStackTrace();
+            return false;
         }
+
+
+
     }
+
+
+    public void verifyBorrow(int rowsAffected){
+
+        if(rowsAffected == 1){
+            System.out.println("Book successfully borrowed");
+        }
+        else{
+            System.out.println("Something went wrong. You were not able to borrow that book");
+        }
+
+    }
+
+    public void verifyReturn(int rowsAffected){
+
+        if(rowsAffected == 1){
+            System.out.println("Book successfully returned");
+        }
+        else{
+            System.out.println("Something went wrong. You were not able to return that book");
+        }
+
+    }
+
+
 }
