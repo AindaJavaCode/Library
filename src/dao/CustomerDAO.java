@@ -19,7 +19,7 @@ public class CustomerDAO {
 
     private static final String UPDATE_BORROW_BOOK = "UPDATE books SET isborrowed_by_customer_id = ?, is_borrowed = ? WHERE book_id = ?";
 
-    private static final String DISPLAY_BOOKS = "SELECT book_name, book_author FROM books WHERE isborrowed_by_customer_id = ?";
+    private static final String DISPLAY_BOOKS = "SELECT book_id, book_name, book_author FROM books WHERE isborrowed_by_customer_id = ?";
 
     private static final String RETURN_BOOK = "UPDATE books SET is_borrowed = false, isborrowed_by_customer_id = null WHERE book_id = ? AND isborrowed_by_customer_id = ? AND is_borrowed = true";
 
@@ -170,10 +170,11 @@ public class CustomerDAO {
 
             while (rs.next()) {
 
+                int bookID = rs.getInt("book_id");
                 String name = rs.getString("book_name");
                 String author = rs.getString("book_author");
 
-                System.out.println(name + " -> " + author);
+                System.out.println(name + " -> " + author + " BOOK ID : " + bookID);
             }
 
 

@@ -5,6 +5,7 @@ import model.Customer;
 import dao.UserDAO;
 
 import java.util.Scanner;
+import java.util.Set;
 
 public class CustomerMenu {
 
@@ -28,7 +29,12 @@ public class CustomerMenu {
         System.out.println("Enter the name of the book or the author");
         String searchTerm = scanner.nextLine();
         System.out.println("Searching...");
-        userDAO.searchBooks(searchTerm);
+        Set<Integer> displayedIDs = userDAO.searchBooks(searchTerm);
+
+        if(displayedIDs.isEmpty()){
+            System.out.println("No books found for that search");
+            return;
+        }
 
         String optionToBorrow = "";
 
@@ -40,7 +46,7 @@ public class CustomerMenu {
             optionToBorrow = scanner.nextLine().toLowerCase();
 
             if(optionToBorrow.equals("y")){
-                borrowBook();
+                borrowBook(displayedIDs);
                 break;
             } else if(optionToBorrow.equals("n")){
                 break;
@@ -53,13 +59,27 @@ public class CustomerMenu {
 
     }
 
-    private void borrowBook(){
+    private void borrowBook(Set<Integer> displayedIDs){
 
         int bookID;
+        boolean validIDEntered = false;
         System.out.println("Enter the ID number of the book you wish to borrow");
-        bookID = scanner.nextInt();
-        scanner.nextLine();
-        customerDAO.customerBorrowBooks(bookID);
+
+        bookID = readIntOnly(scanner);
+
+        while(!validIDEntered){
+            if(displayedIDs.contains(bookID)){
+                customerDAO.customerBorrowBooks(bookID);
+                validIDEntered = true;
+            }
+            else{
+                System.out.println("That is not one of the IDs listed. Review the Book IDs and try again");
+                System.out.println("Enter the ID number of the book you wish to borrow");
+                bookID = readIntOnly(scanner);
+            }
+        }
+
+
 
     }
 
@@ -77,8 +97,7 @@ public class CustomerMenu {
 
         System.out.println("Please select the ID of the book you wish to return");
         int bookID;
-        bookID = scanner.nextInt();
-        scanner.nextLine();
+        bookID = readIntOnly(scanner);
         boolean returned = customerDAO.customerReturnBooks(bookID);
 
     }
@@ -94,8 +113,7 @@ public class CustomerMenu {
             System.out.println("2. Return books assigned to you");
             System.out.println("3. Logout");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            int choice = readIntOnly(scanner);
 
             switch(choice) {
 
@@ -115,6 +133,24 @@ public class CustomerMenu {
 
 
 
+    }
+
+    private int readIntOnly(Scanner scanner) {
+        while (true) {
+            String input = scanner.nextLine().trim();
+
+            // Check if input contains ONLY digits
+            if (!input.matches("\\d+")) {
+                System.out.println("Invalid input. Numbers only. Try again");
+                continue;
+            }
+            try{
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Number too large. Please enter a smaller number");
+            }
+
+        }
     }
 
 }

@@ -6,12 +6,15 @@ import util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UserDAO {
 
 
-    public void searchBooks(String searchTerm){
+    public Set<Integer> searchBooks(String searchTerm){
         String sql = "SELECT * FROM books WHERE book_name LIKE ? OR book_author LIKE ?";
+        Set<Integer> displayedBookIDs = new HashSet<>();
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement statement = conn.prepareStatement(sql)){
@@ -23,6 +26,9 @@ public class UserDAO {
             ResultSet rs = statement.executeQuery();
 
             while (rs.next()){
+
+                int bookID = rs.getInt("book_id");
+                displayedBookIDs.add(bookID);
 
                 String name = rs.getString("book_name");
                 int numOfPages = rs.getInt("num_pages");
@@ -47,19 +53,24 @@ public class UserDAO {
                      borrowed = "This book is not currently borrowed and is available";
                 }
 
+                System.out.printf("BOOK ID : %d\n", bookID);
                 System.out.printf("Book Name : %s\n", name);
                 System.out.printf("Number of Pages : %d\n", numOfPages);
                 System.out.printf("Author : %s\n", book_author);
                 System.out.printf("Is this a rare book? : %s\n", rare);
                 System.out.printf("Is this book currently borrowed : %s\n\n", borrowed);
-                conn.close();
 
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return displayedBookIDs;
+
     }
+
+
 
 
 }
